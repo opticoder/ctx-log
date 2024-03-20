@@ -1,0 +1,23 @@
+icons:
+  trace: "\U0001F526"
+  debug: "\U0001F6E0 "
+  info:  "\U0001F4C3"
+  warn:  "\u26A0\uFE0F "
+  error: "\u2757"
+  crit:  "\u274C"
+  fatal: "\u2620\uFE0F "
+
+levels:
+  trace: "\u001b[96m"
+  debug: "\u001b[94m"
+  info:  "\u001b[97m"
+  warn:  "\u001b[93m"
+  error: "\u001b[91m"
+  crit:  "\u001b[37m\u001b[41m"
+  fatal: "\u001b[37m\u001b[101m\u001b[1m"
+
+fields:
+  module: "\u001b[36m"
+  caller: "\u001b[90m"
+
+# https://stackoverflow.com/a/75985833

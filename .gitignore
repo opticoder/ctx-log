@@ -1,0 +1,8 @@
+cxx/generated/
+__pycache__
+build/
+cmake-build-*/
+
+.vscode/
+.idea/
+cxx/conan_provider.cmake
