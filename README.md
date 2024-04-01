@@ -2,30 +2,32 @@ WIP: C++20 implementation of ctx-log logger
 
 demo.cc
 ```c++
-#include "ctx-log.h"
+#include <ctx-log/ctx-log.h>
 
-auto logger = ctx_log::getLogger("module1");
+
+auto logging = ctx_log::getLogger("module1");
+
 
 void func2() {
-	auto ctx = logger.withCtxFields();
+	auto logger = logging.withCtxFields();
 	logger().warnf("%s before set ctx", "func2");
-	logger.setCtxField(ctx, "func2", "val");
+	logger.setCtxField("func2", "val");
 	logger().errorf("%s after set ctx", "func2");
 }
 
 void func1() {
-	auto ctx = logger.withCtxFields();
+	auto logger = logging.withCtxFields();
 	logger().debugf("%s before set ctx", "func1");
-	logger.setCtxField(ctx, "func1", "val");
+	logger.setCtxField("func1", "val");
 	logger().infof("%s after set ctx", "func1");
 	func2();
 	logger().critf("%s after func2", "func1");
 }
 
 void start() {
-	logger().trace("main before", "func1");
+	logging().trace("main before", "func1");
 	func1();
-	logger().fatal("main", "after", "func1");
+	logging().fatal("main", "after", "func1");
 }
 
 int main() {
@@ -66,7 +68,7 @@ conan create . --build=missing --test-folder tests -o context_engine=userver
 ```
 
 ### TODO
-- [ ] explicit context (Golang-style) handling
+- [X] explicit context (Golang-style) handling
 - [ ] add others' async frameworks context engines
 - [ ] console icons/colors disabling ability
 - [ ] fields renaming/hiding

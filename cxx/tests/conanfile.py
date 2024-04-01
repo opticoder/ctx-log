@@ -34,4 +34,5 @@ class ctx_logTestConan(ConanFile):
         if can_run(self):
             cmd = os.path.join(self.cpp.build.bindir, "demo")
             # cmd = os.path.join(self.cpp.build.bindir, "context")
+            # cmd = os.path.join(self.cpp.build.bindir, "context_explicit")
             self.run(cmd, env="conanrun")

@@ -1,23 +1,23 @@
-#include "ctx-log.h"
+#include <ctx-log/ctx-log.h>
 
 #ifdef CONTEXT_ENGINE_USERVER
 #include "userver_run.h"
 #endif
 
-auto logger = ctx_log::getLogger("handlers");
+auto logging = ctx_log::getLogger("module1");
 
 
 void level3() {
-	auto ctx = logger.withCtxFields();
+	auto logger = logging.withCtxFields();
 	logger().debug("level3 before set ctx");
-	logger.setCtxField(ctx, "level3", "v");
+	logger.setCtxField("level3", "v");
 	logger().debug("level3 after set ctx");
 }
 
 void level2() {
-	auto ctx = logger.withCtxFields();
+	auto logger = logging.withCtxFields();
 	logger().debug("level2 before set ctx");
-	logger.setCtxField(ctx, "level2", "v");
+	logger.setCtxField("level2", "v");
 	logger().debug("level2 after set ctx");
 #ifdef CONTEXT_ENGINE_USERVER
 	userver::utils::Async("level3", level3).Get();
@@ -27,27 +27,28 @@ void level2() {
 }
 
 void level1() {
-	auto ctx = logger.withCtxFields();
+	auto logger = logging.withCtxFields();
 	logger().debug("level1 before set ctx");
-	logger.setCtxField(ctx, "level1", "v");
+	logger.setCtxField("level1", "v");
 	logger().debug("level1 after set ctx");
 	level2();
 	logger().debug("level1 after level2");
 }
 
-void start(bool engine_threads) {
-	auto ctx = logger.withCtxFields();
-	if (engine_threads) logger().debug("engine: threads"); else logger().debug("engine: userver");
-	logger.setCtxField(ctx, "level0", "v");
+void start() {
+	logging().debug("main before set ctx");
+	auto logger = logging.withCtxFields();
+	logger.setCtxField("main", "v");
+	logger().debug("main before level1");
 	level1();
-	logger().debug("level0 after level1");
+	logger().debug("main after level1");
 }
 
 // TODO: test same key
 int main() {
 	auto cfg = ctx_log::Config{};
 	ctx_log::setLogger(ctx_log::Config{
-						.JSON = true,
+//						.JSON = true,
 						.level = ctx_log::Level::DEBUG,
 						.staticFields = ctx_log::CtxFields{{"key", "val"}},
 #ifdef CONTEXT_ENGINE_USERVER
@@ -56,8 +57,11 @@ int main() {
 						});
 
 #ifdef CONTEXT_ENGINE_USERVER
+	auto logger = ctx_log::getLogger("main", ctx_log::InitThreadsContext());
+	logger().debug("engine: userver");
 	run_userver();
 #else
-	start(true);
+	logging().debug("engine: threads");
+	start();
 #endif
 }

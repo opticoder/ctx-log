@@ -2,7 +2,11 @@
 
 #include <string>
 
+#include "../level.h"
+
+
 namespace ctx_log::internal {
+	constinit const int levelsCount = 1 + static_cast<int>(Level::FATAL);
 
 	struct LevelColor {
 		std::string icon;
@@ -15,7 +19,7 @@ namespace ctx_log::internal {
 	};
 
 	struct Colors {
-		LevelColor level[7];
+		LevelColor level[levelsCount];
 		Fields fields;
 	};
 
@@ -25,4 +29,6 @@ namespace ctx_log::internal {
 	constexpr std::string Colorize(const std::string& s, std::string& color) {
 		return color + s + reset;
 	}
+
+	void loadColors();
 }

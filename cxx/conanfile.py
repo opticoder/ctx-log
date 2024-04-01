@@ -5,6 +5,8 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.build import check_max_cppstd, check_min_cppstd
 from conan.tools.files import copy
 
+required_conan_version = ">=2.2"
+
 
 class ctx_logRecipe(ConanFile):
     name = "ctx-log"
@@ -29,7 +31,7 @@ class ctx_logRecipe(ConanFile):
         "context_engine": "threads",
     }
 
-    exports_sources = "CMakeLists.txt", "*.cc", "include/*"
+    exports_sources = "CMakeLists.txt", "ctx-log/*"
 
     def export_sources(self):
         copy(self, "colors.yaml", os.path.join(self.recipe_folder, ".."), self.export_sources_folder)
@@ -52,24 +54,10 @@ class ctx_logRecipe(ConanFile):
         if self.recipe_folder in current_directory:
             from_project_root = True
 
-        # TODO: https://github.com/conan-io/conan/pull/13930
-        # recipes_path = "3rdparty-index"
-        # if from_project_root:
-        #     recipes_path = os.path.join(self.recipe_folder, recipes_path)
-        # self.run("conan remote add --force 3rdparty file://"+recipes_path)
-
-        requirements = self.conan_data.get('3rdparty', [])
-        for name in requirements:
-            recipes_path = os.path.join("3rdparty-index", "recipes", name, "all")
-            if from_project_root:
-                recipes_path = os.path.join(self.recipe_folder, recipes_path)
-            self.run("conan export .", cwd=recipes_path)
-
-        if self.options.context_engine == "userver":
-            recipes_path = os.path.join("3rdparty-index", "recipes", "userver", "all")
-            if from_project_root:
-                recipes_path = os.path.join(self.recipe_folder, recipes_path)
-            self.run("conan export --version cci.20240219 .", cwd=recipes_path)
+        recipes_path = "3rdparty-index"
+        if from_project_root:
+            recipes_path = os.path.join(self.recipe_folder, recipes_path)
+        self.run("conan remote add --force --type local-recipes-index --index 0 3rdparty " + recipes_path)
 
     def requirements(self):
         requirements = self.conan_data.get('requirements', [])
@@ -88,8 +76,6 @@ class ctx_logRecipe(ConanFile):
 
     def layout(self):
         cmake_layout(self)
-        # cmake_layout(self, src_folder="src")
-        # self.cpp.package.includedirs = ["myinclude"]
 
     def generate(self):
         deps = CMakeDeps(self)

@@ -7,7 +7,7 @@
 #include <userver/utils/async.hpp>
 
 
-void start(bool engine_threads);
+void start();
 
 namespace ctx_log::test {
 	class Component final : public userver::components::LoggableComponentBase {
@@ -18,7 +18,7 @@ namespace ctx_log::test {
 		Component(const userver::components::ComponentConfig& config,
 				  const userver::components::ComponentContext& context)
 				: userver::components::LoggableComponentBase(config, context) {
-			userver::utils::Async("test", [] { start(false); }).Get();
+			userver::utils::Async("test", [] { start(); }).Get();
 		}
 
 		~Component() = default;
