@@ -2,7 +2,6 @@ package ctx_log
 
 import (
 	"context"
-	"reflect"
 	"runtime"
 	"strings"
 )
@@ -80,10 +79,22 @@ type Config struct {
 	ModuleField  *string
 }
 
-func getPackageName(pkg interface{}) string {
-	strs := strings.Split((runtime.FuncForPC(reflect.ValueOf(pkg).Pointer()).Name()), ".")
-	strs = strings.Split(strs[len(strs)-2], "/")
-	return strs[len(strs)-1]
+func retrieveCallInfo() string {
+	pc, _, _, _ := runtime.Caller(2)
+	parts := strings.Split(runtime.FuncForPC(pc).Name(), ".")
+	pl := len(parts)
+	packageName := ""
+
+	if parts[pl-2][0] == '(' {
+		packageName = parts[pl-3]
+	} else {
+		packageName = parts[pl-2]
+	}
+	// trim filename
+	idx := strings.LastIndex(packageName, "/")
+	packageName = packageName[idx+1:]
+
+	return packageName
 }
 
 // TODO: initLogging
@@ -92,14 +103,11 @@ func SetLogger(config *Config) error {
 }
 
 func GetLogger(module interface{}) ContextLogger {
-	if module == nil {
-		return getLogger("root")
-	}
 	name, ok := module.(string)
 	if ok {
 		return getLogger(name)
 	}
-	return getLogger(getPackageName(module))
+	return getLogger(retrieveCallInfo())
 }
 
 func Text2Level(level string) Level {

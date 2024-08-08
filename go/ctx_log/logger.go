@@ -25,6 +25,7 @@ type ctxLogger struct {
 	loggerBase *zap.Logger
 	name       string
 	logger     *zap.Logger
+	//level      Level
 }
 
 func getLogger(name string) ContextLogger {
@@ -49,7 +50,7 @@ func (l *ctxLogger) getLogger() *zap.Logger {
 }
 
 func text2Level(level string) Level {
-	var logLevel Level
+	logLevel := FatalLevel + 1
 	switch strings.ToUpper(level) {
 	case "TRACE":
 		logLevel = TraceLevel
@@ -67,7 +68,6 @@ func text2Level(level string) Level {
 		logLevel = FatalLevel
 	}
 	return logLevel
-	// zapcore.ParseLevel
 }
 
 func zapLevel(lvl Level) *zapcore.Level {
@@ -140,8 +140,8 @@ func setLogger(config *Config) error {
 
 	logger := zap.New(zapcore.NewCore(enc,
 		zapcore.AddSync(os.Stdout),
-		//zap.NewAtomicLevelAt(*level)),
-		zapTraceLevel),
+		zap.NewAtomicLevelAt(*level)),
+		//zapTraceLevel),
 		zap.AddCaller(),
 		zap.AddCallerSkip(1),
 		zap.AddStacktrace(zapTraceLevel),
@@ -238,10 +238,6 @@ func (e consoleEncoder) Clone() zapcore.Encoder {
 }
 
 func (e consoleEncoder) EncodeEntry(entry zapcore.Entry, extra []zapcore.Field) (*buffer.Buffer, error) {
-	module := entry.LoggerName
-	if module != "" {
-		entry.LoggerName = ""
-	}
 	jsonFields, err := e.Encoder.EncodeEntry(entry, extra)
 	if err != nil {
 		return jsonFields, err
@@ -272,6 +268,12 @@ func (e consoleEncoder) EncodeEntry(entry zapcore.Entry, extra []zapcore.Field) 
 	} else {
 		caller = entry.Caller.TrimmedPath()
 	}
+	module := entry.LoggerName
+	if module != "" {
+		entry.LoggerName = ""
+	} else {
+		module = strings.Split(caller, "/")[0]
+	}
 	buf.AppendString(applyModuleColor(" [" + module + "]"))
 	buf.AppendString(applyCallerColor(" [" + caller + "]"))
 
@@ -284,6 +286,7 @@ func (e consoleEncoder) EncodeEntry(entry zapcore.Entry, extra []zapcore.Field) 
 }
 
 func (l *ctxLogger) Trace(args ...interface{}) {
+	//if l.
 	l.getLogger().Log(zapTraceLevel, fmt.Sprint(args...))
 }
 
